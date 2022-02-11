@@ -1,1 +1,10 @@
-# blockchain-project_1
+![blockHeight0](https://user-images.githubusercontent.com/99355229/153627758-fe16cd60-46ce-4c14-a091-44c2d051beb1.jpg)
+![requestValidation1](https://user-images.githubusercontent.com/99355229/153627806-82866a7c-862b-4028-8c93-5b94250817f6.jpg)
+![submitStar1](https://user-images.githubusercontent.com/99355229/153627835-26ab838c-91c3-4b00-8db0-c088c064d734.jpg)
+![requestValidation2](https://user-images.githubusercontent.com/99355229/153627860-10c7aad4-09ec-4218-a12f-f7e84c4bf5f5.jpg)
+![submitStar2](https://user-images.githubusercontent.com/99355229/153627934-a086a1aa-084e-4c60-9916-47749faacb4c.jpg)
+![blockByHash](https://user-images.githubusercontent.com/99355229/153627974-9ad27c54-af82-487a-bddd-f39aaa72f221.jpg)
+![starsByOwner](https://user-images.githubusercontent.com/99355229/153628026-931a8066-29f3-47b3-b64f-ae1675d4afb9.jpg)
+![validateChain](https://user-images.githubusercontent.com/99355229/153628065-3f185b3b-33a5-438a-bf30-bc00f147a451.jpg)
+![terminalOutput](https://user-images.githubusercontent.com/99355229/153628100-18f007fe-093f-4412-8358-1e2d4e267f89.jpg)
+
