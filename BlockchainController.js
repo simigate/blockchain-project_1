@@ -67,7 +67,7 @@ class BlockchainController {
                     if (block) {
                         return res.status(200).json(block);
                     } else {
-                        return res.status(500).send("An error happened!");
+                        return res.status(500).send("An error happened and submit star aborted!");
                     }
                 } catch (error) {
                     return res.status(500).send(error);
@@ -103,7 +103,7 @@ class BlockchainController {
                 const address = req.params.address;
                 try {
                     let stars = await this.blockchain.getStarsByWalletAddress(address);
-                    if (stars) {
+                    if (stars.length != 0) {
                         return res.status(200).json(stars);
                     } else {
                         return res.status(404).send("Block Not Found!");
