@@ -11,7 +11,7 @@
 const SHA256 = require('crypto-js/sha256');
 const BlockClass = require('./block.js');
 const bitcoinMessage = require('bitcoinjs-message');
-
+const error = require('debug')('http:errors');
 class Blockchain {
 
     /**
@@ -63,20 +63,29 @@ class Blockchain {
      */
     _addBlock(block) {
         let self = this;
+        let noErrors = [];
         return new Promise(async (resolve, reject) => {
             try {
-                block.time = new Date().getTime().toString().slice(0, -3); //Assign block time
-                block.height = self.chain.length;                            //Assign block height
+                block.time = new Date().getTime().toString().slice(0, -3);  //Assign block time
+                block.height = self.chain.length;                           //Assign block height
                 if (block.height > 0) {                                     //Check block height and assign block previous hash
                     block.previousBlockHash = self.chain[self.chain.length - 1].hash;
                 }
                 block.hash = SHA256(JSON.stringify(block)).toString();     //Assign block hash
-                self.chain.push(block);
-                this.height++;
-                resolve(block);
-            }
-            catch (err) {        // Errors during execution - reject 
-                reject(Error(err));
+                //block.height = self.chain.length;       //Uncomment and comment the other to enter invalid block
+                noErrors = await self.validateChain();    //Validate for errors 
+                if (noErrors.length === 0) {              //Add blocks when the chain is valid
+                    self.chain.push(block);
+                    this.height++;
+                    resolve(block);
+                }
+                else {        // Error - Block validation failed
+                    resolve(null);
+                    error("The chain is not valid");
+                }
+            } catch (err) {   //Error- happen during the execution
+                resolve(null);
+                error(err);
             }
         });
     }
@@ -116,26 +125,29 @@ class Blockchain {
      */
     submitStar(address, message, signature, star) {
         let self = this;
-        let messageTime = parseInt(message.split(':')[1]); //Get message time
-        let currentTime = parseInt(new Date().getTime().toString().slice(0, -3));//Get current time
+        let messageTime = parseInt(message.split(':')[1]);   //Get message time
+        let currentTime = parseInt(new Date().getTime().toString().slice(0, -3));  //Get current time
         return new Promise(async (resolve, reject) => {
-            if ((currentTime - messageTime) < (5 * 60)) {//Check <5 mts
-                if (bitcoinMessage.verify(message, address, signature)) {//verify address and signature
-                    let newBlock = new BlockClass.Block({ address: address, star: star });//create block
-                    let block = await self._addBlock(newBlock);//add block
+            if ((currentTime - messageTime) < (5 * 60)) {    //Check <5 mts
+                if (bitcoinMessage.verify(message, address, signature)) {  //verify address and signature
+                    let newBlock = new BlockClass.Block({ address: address, star: star });  //create block
+                    let block = await self._addBlock(newBlock);   //add block
                     if (block) {
-                        resolve(block); //resove with block
+                        resolve(block);  //resolve with block if added
                     }
                     else {
-                        reject(Error("Failed to submit stars"));
+                        resolve(null);   //Error 
+                        error("Failed to submit stars");
                     }
                 }
                 else {
-                    reject(Error("Bitcoin verification failed"));
+                    resolve(null);   //Error
+                    error("Bitcoin verification failed");
                 }
             }
             else {
-                reject(Error("Message timed out,exceeded 5mts"));
+                resolve(null);  //Error 
+                error("Message timed out,exceeded 5mts");
             }
         });
     }
@@ -151,10 +163,10 @@ class Blockchain {
         return new Promise((resolve, reject) => {
             let block = self.chain.filter(b => b.hash === hash)[0];// use filter to find block with hash
             if (block) {
-                resolve(block);// return block
+                resolve(block);  // return block
             }
             else {
-                resolve(null);// return null
+                resolve(null);  // return null
             }
         });
     }
@@ -167,7 +179,8 @@ class Blockchain {
     getBlockByHeight(height) {
         let self = this;
         return new Promise((resolve, reject) => {
-            let block = self.chain.filter(p => p.height === height)[0];
+            let block = self.chain.find(p => p.height === height);//suggestion- returns value of first element in array
+            //let block = self.chain.filter(p => p.height === height)[0];
             if (block) {
                 resolve(block);
             } else {
@@ -209,11 +222,11 @@ class Blockchain {
         return new Promise(async (resolve, reject) => {
             self.chain.forEach(async (b, i) => {
                 let valid = await b.validate();
-                if (!valid) {//Checking if each block is valid
-                    errorLog.push(`Block  ${i}  is not valid`);
+                if (!valid) {   //Checking if each block is valid
+                    errorLog.push(`Block ${i} is not valid`);
                 }
                 if (previousHash !== b.previousBlockHash && b.height > 0) {//checking if chain is not broken
-                    errorLog.push(`Block  ${i}  of chain is broken`);
+                    errorLog.push(`Block ${i} of the chain is broken`);
                 }
                 previousHash = b.hash;
             })
