@@ -37,6 +37,18 @@ class Block {
      */
     validate() {
         let self = this;
+        return self.hash === SHA256(   //Suggestion :Compare the Block's original hash value with the extended self with hash null,
+            JSON.stringify(             // resulting in a Boolean result returned
+                {                          // avoid an imperative change in the constructed Block object and new variable creation 
+                    ...self,                // you can resolve the operation's result directly
+                    "hash": null
+                }
+            )
+        ).toString();
+    }
+    /*// The validate() code below changes the constructed block...
+    validate() {
+        let self = this;
         return new Promise((resolve, reject) => {
             const currentHash = self.hash;// Save in auxiliary variable the current block hash
             self.hash = null;
@@ -50,7 +62,8 @@ class Block {
                 resolve(false);
             }// Returning the Block is not valid
         });
-    }
+    }*/
+
 
     /**
      *  Auxiliary Method to return the block body (decoding the data)
@@ -73,9 +86,9 @@ class Block {
             if (this.height > 0) {
                 resolve(parseDecodeData);
             }
-            // else {
-            //     reject(Error("This is Genesis Block"));
-            // }
+            /*else {
+                 reject(Error("This is Genesis Block"));
+             }*/
         });
     }
 }
